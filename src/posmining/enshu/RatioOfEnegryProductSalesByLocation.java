@@ -91,8 +91,9 @@ public class RatioOfEnegryProductSalesByLocation {
 		public static class MyReducer extends Reducer<CSKV, CSKV, CSKV, CSKV> {
 			protected void reduce(CSKV key, Iterable<CSKV> values, Context context) throws IOException, InterruptedException {
 				// 売り上げを合計
-				double totalSales = 0;
-				int enegrySales = 0;
+
+				long totalSales = 0;
+				long enegrySales = 0;
 				for (CSKV value : values) {
 //					count += value.toInt();
 					String str[] = value.toString().split(",");
@@ -100,12 +101,12 @@ public class RatioOfEnegryProductSalesByLocation {
 					String totalPrice = str[1];
 					if(TargetItem.isTargetItem(category)){
 						enegrySales += Integer.valueOf(totalPrice);
-						}
-					totalPrice += Integer.valueOf(totalPrice);
+					}
+					totalSales += Integer.valueOf(totalPrice);
 				}
 
 				// emit
-				//context.write(key, new CSKV(count));
+				context.write(key, new CSKV(totalSales));
 			}
 		}
 }
