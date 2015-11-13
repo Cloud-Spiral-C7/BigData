@@ -1,5 +1,7 @@
 package posmining.enshu;
 
+import static org.mockito.Matchers.intThat;
+
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -14,6 +16,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
+import posmining.target.TargetItem;
 import posmining.utils.CSKV;
 import posmining.utils.PosUtils;
 
@@ -24,8 +27,10 @@ import posmining.utils.PosUtils;
  */
 public class NutritionDrinkAverageCost {
 
+
 	// MapReduceを実行するためのドライバ
 	public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+
 
 		// MapperクラスとReducerクラスを指定
 		Job job = new Job(new Configuration());
@@ -72,16 +77,20 @@ public class NutritionDrinkAverageCost {
 			// csvファイルをカンマで分割して，配列に格納する
 			String csv[] = value.toString().split(",");
 
-			// おにぎりでないレシートは無視
-			if (csv[PosUtils.ITEM_CATEGORY_NAME].equals("おにぎり・おむすび") == false) {
+			// TargetItemでないレシートは無視
+			if (!TargetItem.isTargetItem(csv[PosUtils.ITEM_CATEGORY_NAME])) {
 				return;
 			}
 
-			// valueとなる販売個数を取得
+			//keyとなる店舗立地を取得
+			String location = csv[PosUtils.LOCATION];
+			//valueとなる個数を取得
 			String count = csv[PosUtils.ITEM_COUNT];
+			//valueとなる販売単価を取得
+			String price = csv[PosUtils.ITEM_PRICE];
 
 			// emitする （emitデータはCSKVオブジェクトに変換すること）
-			context.write(new CSKV("onigiri"), new CSKV(count));
+			context.write(new CSKV(location), new CSKV(count + ":" +price));
 		}
 	}
 
@@ -91,13 +100,17 @@ public class NutritionDrinkAverageCost {
 		protected void reduce(CSKV key, Iterable<CSKV> values, Context context) throws IOException, InterruptedException {
 
 			// 売り上げを合計
-			int count = 0;
+			double totalCount = 0.0;
+			int totalPrice = 0;
 			for (CSKV value : values) {
-				count += value.toInt();
+				String[] splitValue = value.toString().split(":");
+				int count = Integer.parseInt(splitValue[0]);
+				totalCount += count;
+				totalPrice += Integer.parseInt(splitValue[1]) * count;
 			}
 
 			// emit
-			context.write(key, new CSKV(count));
+			context.write(key, new CSKV(String.format("%.2f", totalPrice/totalCount)));
 		}
 	}
 }
