@@ -21,15 +21,41 @@ import posmining.target.TargetItem;
 import posmining.utils.CSKV;
 import posmining.utils.PosUtils;
 
-public class NutritionDrinkSalesOfTiredPeopleByDate {
+public class NutritionDrinkSalesByDate {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
+		NutritionDrinkSalesByDate runner = new NutritionDrinkSalesByDate(args);
+		runner.run("オフィス街1", "Office1");
+		runner.run("オフィス街4", "Office4");
+		runner.run("駅前3", "Station3");
+		runner.run("ロードサイド1", "RoadSide1");
+	}
 
-	// MapReduceを実行するためのドライバ
-	public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+	private String[] args;
 
+	/**
+	 * コンストラクタ
+	 *
+	 * @param args コマンドライン引数
+	 */
+	public NutritionDrinkSalesByDate(String[] args) {
+		this.args = args;
+	}
 
-		// MapperクラスとReducerクラスを指定
-		Job job = new Job(new Configuration());
-		job.setJarByClass(NutritionDrinkAverageCost.class);       // ★このファイルのメインクラスの名前
+	/**
+	 * 分析を開始する
+	 *
+	 * @param location 店舗立地
+	 * @param key ファイル名に使用する店舗立地表記
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ClassNotFoundException
+	 */
+	public void run(String location, String filename) throws IOException, InterruptedException, ClassNotFoundException  {
+		Configuration conf = new Configuration();
+		conf.set("location", location);
+
+		Job job = new Job(conf);
+		job.setJarByClass(NutritionDrinkSalesByDate.class);       // ★このファイルのメインクラスの名前
 		job.setMapperClass(MyMapper.class);
 		job.setReducerClass(MyReducer.class);
 		job.setJobName("2015031");                   // ★自分の学籍番号
@@ -46,7 +72,7 @@ public class NutritionDrinkSalesOfTiredPeopleByDate {
 
 		// 入出力ファイルを指定
 		String inputpath = "posdata";
-		String outputpath = "out/nutritionDrinkSalesOfTiredPeopleByLocation";     // ★MRの出力先
+		String outputpath = "out/nutritionDrinkSalesByDate-" + filename;     // ★MRの出力先
 		if (args.length > 0) {
 			inputpath = args[0];
 		}
@@ -64,17 +90,16 @@ public class NutritionDrinkSalesOfTiredPeopleByDate {
 		job.waitForCompletion(true);
 	}
 
-
 	// Mapperクラスのmap関数を定義
 	public static class MyMapper extends Mapper<LongWritable, Text, CSKV, CSKV> {
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			String csv[] = value.toString().split(",");
+			Configuration conf = context.getConfiguration();
 
 			String location = csv[PosUtils.LOCATION];
 			String category = csv[PosUtils.ITEM_CATEGORY_NAME];
 
-			if (location == "駅前3" || location == "オフィス街1" || location == "オフィス街4" ||
-					!TargetItem.isTargetItem(category)) return;
+			if (!location.equals(conf.get("location")) || !TargetItem.isTargetItem(category)) return;
 
 			String year = csv[PosUtils.YEAR];
 			String month = csv[PosUtils.MONTH];
