@@ -22,6 +22,7 @@ import posmining.utils.CSKV;
 import posmining.utils.PosUtils;
 
 public class NutritionDrinkSalesByDate {
+	public static final String[] weeks = {"月", "火", "水", "木", "金", "土", "日"};
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
 		NutritionDrinkSalesByDate runner = new NutritionDrinkSalesByDate(args);
 		runner.run("オフィス街1", "Office1");
@@ -104,12 +105,17 @@ public class NutritionDrinkSalesByDate {
 			String year = csv[PosUtils.YEAR];
 			String month = csv[PosUtils.MONTH];
 			String day = csv[PosUtils.DATE];
-			String week = csv[PosUtils.WEEK];
+			int week = Integer.parseInt(csv[PosUtils.WEEK]);
 			String isHoliday = csv[PosUtils.IS_HOLIDAY];
-			String price = csv[PosUtils.ITEM_PRICE];
-			String keyStr = year + "," + month + "," + day + "," + week + "," + isHoliday + "," + location;
+			int price = Integer.parseInt(csv[PosUtils.ITEM_PRICE]);
+			int count = Integer.parseInt(csv[PosUtils.ITEM_COUNT]);
 
-			context.write(new CSKV(keyStr), new CSKV(price));
+			String keyStr =
+					year + "/" + month + "/" + day +
+					" (" + NutritionDrinkSalesByDate.weeks[week - 1] + ")\t" +
+					isHoliday + "\t" + location;
+
+			context.write(new CSKV(keyStr), new CSKV(price * count));
 		}
 	}
 
