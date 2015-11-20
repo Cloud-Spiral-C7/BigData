@@ -21,7 +21,7 @@ import posmining.target.TargetItem;
 import posmining.utils.CSKV;
 import posmining.utils.PosUtils;
 
-public class NutritionRatioByDayOfWeek {
+public class NutritionSalesRatioByDayOfWeek {
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
 		String inputPath = "posdata";
 		String outputPath = "out/nutritionRatioByDayOfWeek";
@@ -30,7 +30,7 @@ public class NutritionRatioByDayOfWeek {
 			inputPath = args[0];
 		}
 
-		NutritionRatioByDayOfWeek runner = new NutritionRatioByDayOfWeek(inputPath, outputPath);
+		NutritionSalesRatioByDayOfWeek runner = new NutritionSalesRatioByDayOfWeek(inputPath, outputPath);
 		runner.run();
 	}
 
@@ -41,7 +41,7 @@ public class NutritionRatioByDayOfWeek {
 	 *
 	 * @param args コマンドライン引数
 	 */
-	public NutritionRatioByDayOfWeek(String inputPath, String outPath) {
+	public NutritionSalesRatioByDayOfWeek(String inputPath, String outPath) {
 		this.inputPath = inputPath;
 		this.outPath = outPath;
 	}
@@ -57,7 +57,7 @@ public class NutritionRatioByDayOfWeek {
 	 */
 	public void run() throws IOException, InterruptedException, ClassNotFoundException  {
 		Job job = new Job(new Configuration());
-		job.setJarByClass(NutritionRatioByDayOfWeek.class);       // ★このファイルのメインクラスの名前
+		job.setJarByClass(NutritionSalesRatioByDayOfWeek.class);       // ★このファイルのメインクラスの名前
 		job.setMapperClass(MyMapper.class);
 		job.setReducerClass(MyReducer.class);
 		job.setJobName("2015031");                   // ★自分の学籍番号
