@@ -23,19 +23,27 @@ import posmining.utils.PosUtils;
 
 public class NutritionRatioByDayOfWeek {
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
-		NutritionRatioByDayOfWeek runner = new NutritionRatioByDayOfWeek(args);
+		String inputPath = "posdata";
+		String outputPath = "out/nutritionRatioByDayOfWeek";
+
+		if (args.length > 0) {
+			inputPath = args[0];
+		}
+
+		NutritionRatioByDayOfWeek runner = new NutritionRatioByDayOfWeek(inputPath, outputPath);
 		runner.run();
 	}
 
-	private String[] args;
+	private String inputPath, outPath;
 
 	/**
 	 * コンストラクタ
 	 *
 	 * @param args コマンドライン引数
 	 */
-	public NutritionRatioByDayOfWeek(String[] args) {
-		this.args = args;
+	public NutritionRatioByDayOfWeek(String inputPath, String outPath) {
+		this.inputPath = inputPath;
+		this.outPath = outPath;
 	}
 
 	/**
@@ -64,18 +72,11 @@ public class NutritionRatioByDayOfWeek {
 		job.setOutputKeyClass(CSKV.class);
 		job.setOutputValueClass(CSKV.class);
 
-		// 入出力ファイルを指定
-		String inputpath = "posdata";
-		String outputpath = "out/nutritionDrinkAverageSalesByDayOfWeek";     // ★MRの出力先
-		if (args.length > 0) {
-			inputpath = args[0];
-		}
-
-		FileInputFormat.setInputPaths(job, new Path(inputpath));
-		FileOutputFormat.setOutputPath(job, new Path(outputpath));
+		FileInputFormat.setInputPaths(job, new Path(this.inputPath));
+		FileOutputFormat.setOutputPath(job, new Path(this.outPath));
 
 		// 出力フォルダは実行の度に毎回削除する（上書きエラーが出るため）
-		PosUtils.deleteOutputDir(outputpath);
+		PosUtils.deleteOutputDir(this.outPath);
 
 		// Reducerで使う計算機数を指定
 		job.setNumReduceTasks(8);
@@ -91,8 +92,6 @@ public class NutritionRatioByDayOfWeek {
 
 			String location = csv[PosUtils.LOCATION];
 			String category = csv[PosUtils.ITEM_CATEGORY_NAME];
-
-//			if (!TargetItem.isTargetItem(category)) return;
 
 			String week = csv[PosUtils.WEEK];
 			String price = csv[PosUtils.ITEM_PRICE];
