@@ -21,7 +21,17 @@ import posmining.target.TargetItem;
 import posmining.utils.CSKV;
 import posmining.utils.PosUtils;
 
+/**
+ * 全商品に対する曜日ごとの栄養飲食料品の売上の比率 (0 <= r <= 1) を求めるクラス
+ */
 public class NutritionSalesRatioByDayOfWeek {
+	/**
+	 * POSデータを利用して、全商品に対する曜日ごとの栄養飲食料品の売上の比率を求める
+	 * @param args
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
 		String inputPath = "posdata";
 		String outputPath = "out/nutritionRatioByDayOfWeek";
@@ -39,7 +49,8 @@ public class NutritionSalesRatioByDayOfWeek {
 	/**
 	 * コンストラクタ
 	 *
-	 * @param args コマンドライン引数
+	 * @param inputPath 入力データへのファイルパス
+	 * @param outPath 出力先のファイルパス
 	 */
 	public NutritionSalesRatioByDayOfWeek(String inputPath, String outPath) {
 		this.inputPath = inputPath;
@@ -49,8 +60,6 @@ public class NutritionSalesRatioByDayOfWeek {
 	/**
 	 * 分析を開始する
 	 *
-	 * @param location 店舗立地
-	 * @param key ファイル名に使用する店舗立地表記
 	 * @throws IOException
 	 * @throws InterruptedException
 	 * @throws ClassNotFoundException
